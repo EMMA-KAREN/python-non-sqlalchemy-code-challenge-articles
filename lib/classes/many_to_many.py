@@ -1,38 +1,163 @@
+# Article class is used to handle the relationship between Author and Magazine
 class Article:
+    # A class-level variable that stores all instances of the Article class.
+    all = []  
+
+ # Validates that the author is an instance of Author
+ # Validates that the magazine is an instance of Magazine
+ # Validates that the title is a string between 5 and 50 characters
     def __init__(self, author, magazine, title):
-        self.author = author
-        self.magazine = magazine
-        self.title = title
+        if not isinstance(author, Author):
+            raise Exception("Author must be an instance of Author")
+        if not isinstance(magazine, Magazine):
+            raise Exception("Magazine must be an instance of Magazine")
+        if not isinstance(title, str) or not (5 <= len(title) <= 50):
+            raise Exception("Title must be a string with 5 to 50 characters")
         
+      # Initializes the article with the provided author, magazine, and title
+        self._author = author
+        self._magazine = magazine
+        self._title = title
+
+ #article to the respective collections:
+        # 1. Add to the class-level list of all articles
+        # 2. Add the article to the author's list of articles
+        # 3. Add the article to the magazine's list of articles
+        Article.all.append(self)  
+        self._author.articles().append(self)
+        self._magazine.articles().append(self)
+
+# @property: Decorators for getting and setting the title, author, and magazine properties.
+    @property
+    def title(self):
+        return self._title
+
+    @property
+    def author(self):
+        return self._author
+    
+# set author to change only if the new value is a valid Author instance
+    @author.setter
+    def author(self, value):
+        if not isinstance(value, Author):
+            raise Exception("Author must be an instance of Author")
+        self._author = value
+
+    @property
+    def magazine(self):
+        return self._magazine
+# magazine to change only if the new value is a valid Magazine instance
+    @magazine.setter
+    def magazine(self, value):
+        if not isinstance(value, Magazine):
+            raise Exception("Magazine must be an instance of Magazine")
+        self._magazine = value
+
+# ()
+
 class Author:
+# 
     def __init__(self, name):
-        self.name = name
+# validate name to be non empty string
+        if not isinstance(name, str) or len(name) == 0:
+            raise Exception("Name must be a non-empty string")
+        
+# initialize the author with  a name and an empty list of articles 
+        self._name = name
+        self._articles = []
+
+    @property
+    def name(self):
+        return self._name  
 
     def articles(self):
-        pass
+        return self._articles
 
     def magazines(self):
-        pass
-
+        return list({article.magazine for article in self._articles})
+    
+# method to add new article to the authors list of articles by creating a new aricle and avoid duplicates
     def add_article(self, magazine, title):
-        pass
-
+        if not isinstance(magazine, Magazine):
+            raise Exception("Invalid Magazine instance")
+        article = Article(self, magazine, title)
+        if article not in self._articles:  # Avoid duplicates
+            self._articles.append(article)
+        return article
+# categories the author has written if te authr has not written return none from the unique categories
     def topic_areas(self):
-        pass
+        if not self._articles:
+            return None
+        return list({magazine.category for magazine in self.magazines()})
+
 
 class Magazine:
+    _magazines = []  
+# validate a string of name between 2 to 16 char then Validates the category to be a non-empty string
     def __init__(self, name, category):
-        self.name = name
-        self.category = category
+        if not isinstance(name, str) or not (2 <= len(name) <= 16):
+            raise Exception("Name must be a string with 2 to 16 characters")
+        if not isinstance(category, str) or len(category) == 0:
+            raise Exception("Category must be a non-empty string")
+        
+  # Initializes the magazine with a name, category, and empty list of articles
+        self._name = name
+        self._category = category
+        self._articles = []
+        Magazine._magazines.append(self)
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+# Allows changing the name,
+    def name(self, value):
+        if not isinstance(value, str) or not (2 <= len(value) <= 16):
+            raise Exception("Name must be a string with 2 to 16 characters")
+        self._name = value
+
+    @property
+    def category(self):
+        return self._category
+
+    @category.setter
+#  Allows changing the category,
+    def category(self, value):
+        if not isinstance(value, str) or len(value) == 0:
+            raise Exception("Category must be a non-empty string")
+        self._category = value
 
     def articles(self):
-        pass
+        return self._articles
 
     def contributors(self):
-        pass
+        return list({article.author for article in self._articles})
 
     def article_titles(self):
-        pass
+        if not self._articles:
+            return None
+        return [article.title for article in self._articles]
 
     def contributing_authors(self):
-        pass
+        author_counts = {}
+        for article in self._articles:
+            author_counts[article.author] = author_counts.get(article.author, 0) + 1
+        result = [author for author, count in author_counts.items() if count > 2]
+        return result if result else None
+
+    @classmethod
+    def top_publisher(cls):
+        # If there are no articles, return None
+        if not Article.all:
+            return None
+        
+        # Proceed with finding the magazine with the most articles
+        magazine_counts = {}
+        for article in Article.all:
+            if article.magazine not in magazine_counts:
+                magazine_counts[article.magazine] = 0
+            magazine_counts[article.magazine] += 1
+
+        # Find the magazine with the maximum count of articles
+        return max(magazine_counts, key=magazine_counts.get)
