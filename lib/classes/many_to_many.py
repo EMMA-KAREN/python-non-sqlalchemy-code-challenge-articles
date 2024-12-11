@@ -161,3 +161,30 @@ class Magazine:
 
         # Find the magazine with the maximum count of articles
         return max(magazine_counts, key=magazine_counts.get)
+    
+    # Creating authors, magazines, and articles
+author_1 = Author("Carry Bradshaw")
+author_2 = Author("Nathaniel Hawthorne")
+
+magazine_1 = Magazine("Vogue", "Fashion")
+magazine_2 = Magazine("AD", "Architecture")
+magazine_3 = Magazine("GQ", "Fashion")
+
+# Adding articles
+Article(author_1, magazine_1, "How to wear a tutu with style")
+Article(author_1, magazine_1, "Dating life in NYC")
+Article(author_1, magazine_2, "2023 Eccentric Design Trends")
+
+Article(author_2, magazine_2, "The Scarlet Letter Revival")
+Article(author_2, magazine_1, "Dating life in NYC")
+
+# Output each author and their articles
+for author in [author_1, author_2]:
+    print(f"Author: {author.name}")
+    if author.articles():
+        for article in author.articles():
+            print(f"  - Title: {article.title} (Magazine: {article.magazine.name})")
+    else:
+        print("  No articles written.")
+
+    
